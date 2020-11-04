@@ -1,0 +1,20 @@
+name: Publish Docker
+on:
+  push:
+    branches:
+      - master
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@master
+    - name: Extract branch name
+      shell: bash
+      run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+      id: extract_branch
+    - name: Build Image
+      run: |
+       docker login ghcr.io -u chand1012 --password ${{ secrets.PASSWORD }}
+       docker build -t endlessh:${{ steps.extract_branch.outputs.branch }} .
+       docker tag endlessh:${{ steps.extract_branch.outputs.branch }} ghcr.io/chand1012/endlessh:${{ steps.extract_branch.outputs.branch }}
+       docker push ghcr.io/chand1012/endlessh:${{ steps.extract_branch.outputs.branch }}
